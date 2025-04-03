@@ -29,7 +29,12 @@ app.get("/new", (req, res) => {
 
 app.get("/edit/:id", async (req, res) => {
   try {
-    const response = await axios.get(`${API_URL}/posts/${req.params.id}`);
+    const id = req.params.id;
+    const response = await axios.get(`${API_URL}/posts/${id}`);
+
+    if (id > response.data.length)
+      return res.status(404).json({ message: "Post not found" });
+
     console.log(response.data);
     res.render("modify.ejs", {
       heading: "Edit Post",
@@ -58,9 +63,9 @@ app.post("/api/posts/:id", async (req, res) => {
   try {
     const response = await axios.patch(
       `${API_URL}/posts/${req.params.id}`,
-      req.body
+      req.body,
     );
-    console.log(response.data);
+    // console.log(response.data);
     res.redirect("/");
   } catch (error) {
     res.status(500).json({ message: "Error updating post" });

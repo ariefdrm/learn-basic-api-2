@@ -1,5 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
+import axios from "axios";
 
 const app = express();
 const port = 4000;
@@ -41,14 +42,77 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //Write your code here//
 
 //CHALLENGE 1: GET All posts
+app.get("/posts", (req, res) => {
+  res.json(posts);
+});
 
 //CHALLENGE 2: GET a specific post by id
+app.get("/posts/:id", (req, res) => {
+  try {
+    const post = posts.find((p) => p.id === parseInt(req.params.id));
+    res.json(post);
+  } catch (error) {
+    res.status(404).json({ message: "Post not found" });
+  }
+});
 
 //CHALLENGE 3: POST a new post
+app.post("/posts", (req, res) => {
+  // const data = await axios.get("localhost:4000/posts");
+  const date = new Date();
+
+  const newPost = {
+    id: posts.length + 1,
+    title: req.body.title,
+    content: req.body.content,
+    author: req.body.author,
+    date: date.toISOString(),
+  };
+
+  const addedPost = [...posts, newPost];
+  posts = addedPost;
+  res.json(posts);
+  console.log(posts.length);
+});
 
 //CHALLENGE 4: PATCH a post when you just want to update one parameter
+app.patch("/posts/:id", (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const date = new Date();
+    const post = posts.find((p) => p.id === id);
+
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    const editedPost = {
+      id: id,
+      title: req.body.title ? req.body.title : post.title,
+      content: req.body.content ? req.body.content : post.content,
+      author: req.body.author ? req.body.author : post.author,
+      date: date.toISOString(),
+    };
+
+    const editedPosts = posts.map((p) => {
+      return p.id === id ? editedPost : p;
+    });
+
+    posts = editedPosts;
+    res.json(posts);
+  } catch (error) {
+    res.status(400).json({ message: "Bad request" });
+  }
+});
 
 //CHALLENGE 5: DELETE a specific post by providing the post id.
+app.delete("/posts/:id", (req, res) => {
+  try {
+    const filteredPosts = posts.filter((p) => p.id !== parseInt(req.params.id));
+    posts = filteredPosts;
+    res.json(posts);
+  } catch (error) {
+    res.status(400).json({ message: "Bad request" });
+  }
+});
 
 app.listen(port, () => {
   console.log(`API is running at http://localhost:${port}`);
