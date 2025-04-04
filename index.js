@@ -1,6 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
-import axios from "axios";
+// import axios from "axios";
 
 const app = express();
 const port = 4000;
@@ -50,9 +50,12 @@ app.get("/posts", (req, res) => {
 app.get("/posts/:id", (req, res) => {
   try {
     const post = posts.find((p) => p.id === parseInt(req.params.id));
+
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
     res.json(post);
   } catch (error) {
-    res.status(404).json({ message: "Post not found" });
+    res.status(400).json({ message: "Bad request" });
   }
 });
 
@@ -82,8 +85,6 @@ app.patch("/posts/:id", (req, res) => {
     const date = new Date();
     const post = posts.find((p) => p.id === id);
 
-    if (!post) return res.status(404).json({ message: "Post not found" });
-
     const editedPost = {
       id: id,
       title: req.body.title ? req.body.title : post.title,
@@ -110,7 +111,7 @@ app.delete("/posts/:id", (req, res) => {
     posts = filteredPosts;
     res.json(posts);
   } catch (error) {
-    res.status(400).json({ message: "Bad request" });
+    res.status(404).json({ message: "Invalid id" });
   }
 });
 
